@@ -1,5 +1,5 @@
 export interface SessionLog {
-    id: number;
+    id?: number;
     sessionId: number;
     fearStepId: number;
     initialDegree: number;

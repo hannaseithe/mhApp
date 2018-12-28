@@ -1,5 +1,5 @@
 export interface Fear {
-    id: number;
+    id?: number;
     name: string;
     description: string;
 }

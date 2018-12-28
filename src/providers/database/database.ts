@@ -34,6 +34,9 @@ export class DatabaseProvider {
       .then((db: SQLiteObject) => {
         this.db = db;
         this.isReady = true;
+        this.createTables()
+        .then(() => this.firstDataSet())
+        
       })
       .catch(e => console.log(e));
   }
@@ -96,19 +99,19 @@ export class DatabaseProvider {
 
 
   saveOrUpdateFear(data: Fear): Promise<any> {
-    return this.saveOrUpdate(data,TableName.fear)
+    return this.saveOrUpdate(data, TableName.fear)
   }
   saveOrUpdateFearStep(data: FearStep): Promise<any> {
-    return this.saveOrUpdate(data,TableName.fearStep)
+    return this.saveOrUpdate(data, TableName.fearStep)
   }
   saveOrUpdateSessionLog(data: Fear): Promise<any> {
-    return this.saveOrUpdate(data,TableName.sessionLog)
+    return this.saveOrUpdate(data, TableName.sessionLog)
   }
   saveOrUpdateSession(data: Fear): Promise<any> {
-    return this.saveOrUpdate(data,TableName.session)
+    return this.saveOrUpdate(data, TableName.session)
   }
 
-  saveOrUpdate(data: SessionLog | Session | FearStep | Fear, table: TableName) {
+  saveOrUpdate(data: SessionLog | Session | FearStep | Fear, table: TableName): Promise<any> {
     if (this.isReady) {
       let paramArray = [];
       let statement = "INSERT OR REPLACE INTO " +
@@ -130,15 +133,77 @@ export class DatabaseProvider {
         statement += "?"
       }
       statement += ")"
-      return this.db.executeSql(statement,paramArray)
+      return this.db.executeSql(statement, paramArray)
     } else {
       return Promise.reject('Could not save or update ' + table + ': Database is not ready')
     }
+  }
 
+  deleteFear(id: number): Promise<any> {
+    return this.delete(id, TableName.fear)
+  }
+
+  deleteFearStep(id: number): Promise<any> {
+    return this.delete(id, TableName.fearStep)
+  }
+
+  deleteSession(id: number): Promise<any> {
+    return this.delete(id, TableName.session)
+  }
+
+  deleteSessionLog(id: number): Promise<any> {
+    return this.delete(id, TableName.sessionLog)
+  }
+
+  delete(id: number, table: TableName): Promise<any> {
+    if (this.isReady) {
+      let statement = "DELETE FROM " + table + " WHERE id=" + id;
+      return this.db.executeSql(statement)
+    } else {
+      return Promise.reject('Could not delete from ' + table + ": Database is not ready")
+    }
+  }
+
+  getAllFears(): Promise<any> {
+    if (this.isReady) {
+      const statement = `
+      SELECT 
+      id, name, description
+      FROM fear
+      `
+      return this.db.executeSql(statement)
+    } else {
+      return Promise.reject('Could not get all Fears: Database is not ready')
+    }
+  }
+
+  getAllFearsWithFearStep(): Promise<any> {
+    if (this.isReady) {
+      const statement = `
+      SELECT 
+      fear.id, fear.name, fear.description,
+      fearStep.id, fearStep.name, fearStep.description
+      FROM fear
+      LEFT JOIN fearStep ON fear.id = fearStep.fearId
+      `
+      return this.db.executeSql(statement)
+        .then((result) => {
+          let structuredArray = [];
+          let currentFear: number;
+          for (let i = 0; i++; i < result.rows.length) {
+            let item = result.rows.item(i);
+            console.log(item);
+          }
+        })
+    } else {
+      return Promise.reject('Could not get all Fears with FearSteps: Database is not ready')
+    }
   }
 
 
-firstDataSet(): Promise < any > {
-  return this.db.sqlBatch([])
-}
+  firstDataSet(): Promise<any> {
+    return this.saveOrUpdateFear({ name: 'Custom Fear', description: 'A Custom Fear to show how it works'})
+    .then((result) => console.log(result))
+    ;
+  }
 }

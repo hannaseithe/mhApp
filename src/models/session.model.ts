@@ -1,5 +1,5 @@
 export interface Session {
-    id: number;
+    id?: number;
     number: number;
     startDate: Date;
     endDate: Date;
