@@ -5,6 +5,7 @@ import { SessionLog } from '../../models/sessionLog.model';
 import { Session } from '../../models/session.model';
 import { FearStep } from '../../models/fearStep.model';
 import { Fear } from '../../models/fear.model';
+import { Platform } from 'ionic-angular';
 
 
 /*
@@ -26,7 +27,11 @@ export class DatabaseProvider {
   db: SQLiteObject = null;
   isReady: boolean = false;
 
-  constructor(private sqlite: SQLite) {
+  constructor(private sqlite: SQLite, private platform: Platform) {
+    console.log('Inside Constructor');
+    this.platform.ready().then(() => {
+
+      console.log('Inside Plaform Ready');
     this.sqlite.create({
       name: 'data.db',
       location: 'default'
@@ -36,9 +41,13 @@ export class DatabaseProvider {
         this.isReady = true;
         this.createTables()
         .then(() => this.firstDataSet())
+        .catch((error) => console.log('Error in CreateTables(): ', error))
         
       })
-      .catch(e => console.log(e));
+      .catch(e => console.log('Error', e));
+      
+      });
+    
   }
 
   createTables(): Promise<any> {
@@ -90,9 +99,9 @@ export class DatabaseProvider {
         sessionLogTable
       ])
         .then(() => console.log('Created Tables'))
-        .catch(e => console.log(e));
+        .catch(e => console.log('Error in createTables(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
     } else {
-      return Promise.reject('Could create Tables: Database is not ready')
+      return Promise.reject('Could not create Tables: Database is not ready')
     }
   }
 
