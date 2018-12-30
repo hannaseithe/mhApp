@@ -6,6 +6,7 @@ import { Session } from '../../models/session.model';
 import { FearStep } from '../../models/fearStep.model';
 import { Fear } from '../../models/fear.model';
 import { Platform } from 'ionic-angular';
+import { BehaviorSubject } from 'rxjs';
 
 
 /*
@@ -24,6 +25,8 @@ enum TableName {
 @Injectable()
 export class DatabaseProvider {
 
+  allFears: BehaviorSubject<Fear[]> = new BehaviorSubject([]);
+
   db: SQLiteObject = null;
   isReady: Promise<any>;
 
@@ -39,7 +42,10 @@ export class DatabaseProvider {
 
             this.createTables()
               .then(() => this.firstDataSet())
-              .then(() => resolve())
+              .then(() => {
+                resolve();
+                this.getAllFears()
+              })
               .catch((e) => console.log('Error: ', JSON.stringify(e, Object.getOwnPropertyNames(e))))
           })
           .catch(e => console.log('Error', e));
@@ -61,7 +67,10 @@ export class DatabaseProvider {
       fearStepStatement,
       fearStatement
     ])
-      .then(() => console.log('Emptied Tables'))
+      .then(() => {
+        this.getAllFears();
+        console.log('Emptied Tables')
+      })
       .catch(e => console.log('Error in clearTables(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
 
   }
@@ -123,6 +132,12 @@ export class DatabaseProvider {
 
   saveOrUpdateFear(data: Fear): Promise<any> {
     return this.saveOrUpdate(data, TableName.fear)
+      .then(() => {
+        this.getAllFears();
+        /* this.getAllFearSteps();
+        this.getAllSessions();
+        this.getAllSessionLogs(); */
+      })
   }
   saveOrUpdateFearStep(data: FearStep): Promise<any> {
     return this.saveOrUpdate(data, TableName.fearStep)
@@ -164,6 +179,12 @@ export class DatabaseProvider {
 
   deleteFear(id: number): Promise<any> {
     return this.delete(id, TableName.fear)
+      .then(() => {
+        this.getAllFears();
+        /* this.getAllFearSteps();
+        this.getAllSessions();
+        this.getAllSessionLogs(); */
+      })
   }
 
   deleteFearStep(id: number): Promise<any> {
@@ -201,6 +222,7 @@ export class DatabaseProvider {
         }
         return Promise.resolve(resultArray)
       })
+      .then((resultArray) => this.allFears.next(resultArray))
       .catch(e => console.log('Error in getAllFears(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
 
   }
@@ -233,82 +255,97 @@ export class DatabaseProvider {
       .then((result) => {
         if (result.rows.item(0)['count(*)'] < 1) {
           return this.saveOrUpdateFear({ name: 'Custom Fear', description: 'A Custom Fear to show how it works' })
-            .then((result) => { 
+            .then((result) => {
               console.log(JSON.stringify(result));
-              return { fearId: result.insertId } })
+              return { fearId: result.insertId }
+            })
             .catch(e => console.log('Error in firstDataSet(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
         } else {
-          return Promise.reject('Did not add a fear since table is not empty' as any)
+          return Promise.resolve('Did not add a fear since table is not empty' as any)
         }
       })
       .then((data: any) => {
-        console.log('fearId', data.fearId)
-        countStatement = "SELECT count(*) FROM fearStep";
-        return this.db.executeSql(countStatement, [])
-          .then((result) => {
-            if (result.rows.item(0)['count(*)'] < 1) {
-              return this.saveOrUpdateFearStep({
-                fearId: data.fearId,
-                name: 'Custom FearStep',
-                description: 'A Custom FearStep to show how it works!',
-                initialDegree: 7,
-                creationDate: Date.now()
-              })
-                .then((result) => {
-                  return {
-                    fearId: data.fearId,
-                    fearStepId: result.insertId
-                  }
+        if (data.fearId) {
+          countStatement = "SELECT count(*) FROM fearStep";
+          return this.db.executeSql(countStatement, [])
+            .then((result) => {
+              if (result.rows.item(0)['count(*)'] < 1) {
+                return this.saveOrUpdateFearStep({
+                  fearId: data.fearId,
+                  name: 'Custom FearStep',
+                  description: 'A Custom FearStep to show how it works!',
+                  initialDegree: 7,
+                  creationDate: Date.now()
                 })
-                .catch(e => console.log('Error in firstDataSet(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
-            } else {
-              return Promise.reject('Did not add a fearStep since table is not empty' as any)
-            }
-          })
+                  .then((result) => {
+                    return {
+                      fearId: data.fearId,
+                      fearStepId: result.insertId
+                    }
+                  })
+                  .catch(e => console.log('Error in firstDataSet(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
+              } else {
+                return Promise.resolve('Did not add a fearStep since table is not empty' as any)
+              }
+            })
+        } else {
+          return Promise.resolve(data)
+        }
+
       })
       .then((data: any) => {
-        countStatement = "SELECT count(*) FROM session";
-        return this.db.executeSql(countStatement, [])
-          .then((result) => {
-            if (result.rows.item(0)['count(*)'] < 1) {
-              return this.saveOrUpdateSession({
-                fearId: data.fearId,
-                number: 1,
-                startDate: Date.now(),
-                endDate: Date.now() + 5000,
-                note: 'A custom session, just to test how it works'
-              })
-                .then((result) => {
-                  return {
-                    fearId: data.fearId,
-                    fearStepId: data.fearStepId,
-                    sessionId: result.insertId
-                  }
+        if (data.fearId) {
+          countStatement = "SELECT count(*) FROM session";
+          return this.db.executeSql(countStatement, [])
+            .then((result) => {
+              if (result.rows.item(0)['count(*)'] < 1) {
+                return this.saveOrUpdateSession({
+                  fearId: data.fearId,
+                  number: 1,
+                  startDate: Date.now(),
+                  endDate: Date.now() + 5000,
+                  note: 'A custom session, just to test how it works'
                 })
-                .catch(e => console.log('Error in firstDataSet(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
-            } else {
-              return Promise.reject('Did not add a session since table is not empty' as any)
-            }
-          })
+                  .then((result) => {
+                    return {
+                      fearId: data.fearId,
+                      fearStepId: data.fearStepId,
+                      sessionId: result.insertId
+                    }
+                  })
+                  .catch(e => console.log('Error in firstDataSet(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
+              } else {
+                return Promise.resolve('Did not add a session since table is not empty' as any)
+              }
+            })
+        } else {
+          return Promise.resolve(data)
+        }
+
       })
       .then((data: any) => {
-        countStatement = "SELECT count(*) FROM sessionLog";
-        return this.db.executeSql(countStatement, [])
-          .then((result) => {
-            if (result.rows.item(0)['count(*)'] < 1) {
-              return this.saveOrUpdateSessionLog({
-                sessionId: data.sessionId,
-                fearStepId: data.fearStepId,
-                initialDegree: 6,
-                endDegree: 3,
-                date: Date.now() + 8000
-              })
-                .then((result) => 'FirstDataSet Promise Chain finished')
-                .catch(e => console.log('Error in firstDataSet(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
-            } else {
-              return Promise.reject('Did not add a sessionLog since table is not empty' as any)
-            }
-          })
+        if (data.fearId) {
+          countStatement = "SELECT count(*) FROM sessionLog";
+          return this.db.executeSql(countStatement, [])
+            .then((result) => {
+              if (result.rows.item(0)['count(*)'] < 1) {
+                return this.saveOrUpdateSessionLog({
+                  sessionId: data.sessionId,
+                  fearStepId: data.fearStepId,
+                  initialDegree: 6,
+                  endDegree: 3,
+                  date: Date.now() + 8000
+                })
+                  .then((result) => 'FirstDataSet Promise Chain finished')
+                  .catch(e => console.log('Error in firstDataSet(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
+              } else {
+                return Promise.resolve('Did not add a sessionLog since table is not empty' as any)
+              }
+            })
+        } else {
+          return Promise.resolve(data)
+        }
+
       })
   }
 }

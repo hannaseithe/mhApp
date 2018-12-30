@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { DatabaseProvider } from '../../providers/database/database';
+import { Fear } from '../../models/fear.model';
 
 @Component({
   selector: 'page-home',
@@ -8,24 +9,19 @@ import { DatabaseProvider } from '../../providers/database/database';
 })
 export class HomePage {
 
-  value: void | any[];
+  fears: Fear[];
 
   constructor(public navCtrl: NavController, private db: DatabaseProvider) {
     console.log('Inside Component Constructor')
+    this.db.allFears.subscribe((fears) => this.fears = fears)
   }
 
   ngOnInit() {
-    this.db.isReady
-    .then(() => this.db.getAllFears())
-    .then((result) => {
-      console.log(result);
-      this.value = result;
-    })
   }
 
   emptyDB() {
     this.db.clearTables()
   }
 
-  
+
 }
