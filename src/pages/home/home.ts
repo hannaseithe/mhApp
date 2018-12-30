@@ -8,8 +8,24 @@ import { DatabaseProvider } from '../../providers/database/database';
 })
 export class HomePage {
 
-  constructor(public navCtrl: NavController, private db: DatabaseProvider) {
+  value: void | any[];
 
+  constructor(public navCtrl: NavController, private db: DatabaseProvider) {
+    console.log('Inside Component Constructor')
   }
 
+  ngOnInit() {
+    this.db.isReady
+    .then(() => this.db.getAllFears())
+    .then((result) => {
+      console.log(result);
+      this.value = result;
+    })
+  }
+
+  emptyDB() {
+    this.db.clearTables()
+  }
+
+  
 }

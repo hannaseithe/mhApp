@@ -1,8 +1,8 @@
 export interface Session {
     id?: number;
     number: number;
-    startDate: Date;
-    endDate: Date;
+    startDate: number;
+    endDate: number;
     note: string;
     fearId: number;
 }

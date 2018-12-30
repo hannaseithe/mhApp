@@ -4,5 +4,5 @@ export interface FearStep {
     name: string;
     description: string;
     initialDegree: number;
-    creationDate: Date;
+    creationDate: number;
 }

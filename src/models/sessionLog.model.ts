@@ -4,6 +4,6 @@ export interface SessionLog {
     fearStepId: number;
     initialDegree: number;
     endDegree: number;
-    date: Date;
-    note: string;
+    date: number;
+    note?: string;
 }
