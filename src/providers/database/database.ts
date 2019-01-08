@@ -25,7 +25,9 @@ enum TableName {
 @Injectable()
 export class DatabaseProvider {
 
+
   allFears: BehaviorSubject<Fear[]> = new BehaviorSubject([]);
+  allFearSteps: BehaviorSubject<FearStep[]> = new BehaviorSubject([]);
 
   db: SQLiteObject = null;
   isReady: Promise<any>;
@@ -44,7 +46,8 @@ export class DatabaseProvider {
               .then(() => this.firstDataSet())
               .then(() => {
                 resolve();
-                this.getAllFears()
+                this.getAllFears();
+                this.getAllFearSteps();
               })
               .catch((e) => console.log('Error: ', JSON.stringify(e, Object.getOwnPropertyNames(e))))
           })
@@ -132,15 +135,17 @@ export class DatabaseProvider {
 
   saveOrUpdateFear(data: Fear): Promise<any> {
     return this.saveOrUpdate(data, TableName.fear)
-      .then(() => {
+      .then((result) => {
         this.getAllFears();
-        /* this.getAllFearSteps();
-        this.getAllSessions();
-        this.getAllSessionLogs(); */
+        return Promise.resolve(result)
       })
   }
   saveOrUpdateFearStep(data: FearStep): Promise<any> {
     return this.saveOrUpdate(data, TableName.fearStep)
+      .then((result) => {
+        this.getAllFearSteps();
+        return Promise.resolve(result)
+      })
   }
   saveOrUpdateSessionLog(data: SessionLog): Promise<any> {
     return this.saveOrUpdate(data, TableName.sessionLog)
@@ -181,8 +186,8 @@ export class DatabaseProvider {
     return this.delete(id, TableName.fear)
       .then(() => {
         this.getAllFears();
-        /* this.getAllFearSteps();
-        this.getAllSessions();
+       this.getAllFearSteps();
+        /*this.getAllSessions();
         this.getAllSessionLogs(); */
       })
   }
@@ -227,27 +232,104 @@ export class DatabaseProvider {
 
   }
 
-  getAllFearsWithFearStep(): Promise<any> {
+  getAllFearSteps(): Promise<any> {
 
     const statement = `
       SELECT 
-      fear.id, fear.name, fear.description,
-      fearStep.id, fearStep.name, fearStep.description
+      fear.id as fearId, fear.name as fearName, fear.description as fearDescription,
+      fearStep.id, fearStep.name, fearStep.description, initialDegree, creationDate
       FROM fear
       LEFT JOIN fearStep ON fear.id = fearStep.fearId
-      `
-    return this.db.executeSql(statement)
+      `;
+    return this.db.executeSql(statement, [])
       .then((result) => {
-        /*           let structuredArray = [];
-                  let currentFear: number; */
-        for (let i = 0; i++; i < result.rows.length) {
+        let resultArray = [];
+        console.log('result of getAllFearSteps', JSON.stringify(result));
+        let fearIndex = -1;
+        for (let i = 0; i < result.rows.length; i++) {
           let item = result.rows.item(i);
-          console.log(item);
+          if (fearIndex < 0 || resultArray[fearIndex].fearId !== item.fearId) {
+            fearIndex++
+            resultArray[fearIndex] = {
+              fearId: item.fearId,
+              fearName: item.fearName,
+              fearDescription: item.fearDescription,
+              fearSteps: [{
+                id: item.id,
+                name: item.name,
+                description: item.description,
+                initialDegree: item.initialDegree,
+                creationDate: item.creationDate
+              }]
+            }
+          } else {
+            resultArray[fearIndex].fearSteps = [...resultArray[fearIndex].fearSteps, {
+                id: item.id,
+                name: item.name,
+                description: item.description,
+                initialDegree: item.initialDegree,
+                creationDate: item.creationDate
+              }]
+          }
         }
+        console.log('resultArray of getAllFearSteps', JSON.stringify(resultArray))
+        return Promise.resolve(resultArray)
       })
-      .catch(e => console.log('Error in getAllFearsWithFearStep(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
+      .then((resultArray) => this.allFearSteps.next(resultArray))
+      .catch(e => console.log('Error in getAllFearSteps(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
   }
 
+  getFear(fearId: number): Promise<any> {
+    const statement = `
+    SELECT *
+    FROM fear
+    WHERE id = ?
+    `;
+    return this.db.executeSql(statement, [fearId])
+    .then((result) => {
+      let resultArray = [];
+      for (let i = 0; i < result.rows.length; i++) {
+        resultArray = [...resultArray, result.rows.item(i)];
+      }
+      console.log('resultArray from getFear() ', resultArray);
+      return Promise.resolve(resultArray)
+    })
+    .catch(e => console.log('Error in getFear(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
+  }
+
+  getExtendedFearSteps(fearId: number): Promise<any> {
+    const statement = `
+    SELECT 
+    fearStep.id as fsId,
+    fearStep.name as fsName,
+    fearStep.description as fsDescription,
+    fearStep.initialDegree as fsInitialDegree,
+    fearStep.creationDate as fsCreationDate,
+    sessionLog.id as slId,
+    sessionLog.initialDegree as slInitialDegree,
+    sessionLog.endDegree as slEndDegree,
+    session.id as sId,
+    session.number as sNumber,
+    session.endDate  as sEndDate    
+    FROM fear
+    LEFT JOIN fearStep ON fear.id = fearStep.fearId
+    LEFT JOIN sessionLog ON fearStep.id = sessionLog.fearStepId
+    LEFT JOIN session ON sessionLog.sessionId = session.id
+    WHERE fear.id = ?
+    `;
+
+    return this.db.executeSql(statement, [fearId])
+    .then((result) => {
+      let resultArray = [];
+      for (let i = 0; i < result.rows.length; i++) {
+        resultArray = [...resultArray, result.rows.item(i)];
+      }
+      console.log(fearId);
+      console.log('resultArray from getExtendedFearSteps() ', resultArray);
+      return Promise.resolve(resultArray)
+    })
+    .catch(e => console.log('Error in getFear(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
+  }
 
   firstDataSet(): Promise<any> {
     let countStatement = "SELECT count(*) FROM fear";
@@ -256,7 +338,7 @@ export class DatabaseProvider {
         if (result.rows.item(0)['count(*)'] < 1) {
           return this.saveOrUpdateFear({ name: 'Custom Fear', description: 'A Custom Fear to show how it works' })
             .then((result) => {
-              console.log(JSON.stringify(result));
+              console.log('result of SaveOrUpdateFear', JSON.stringify(result));
               return { fearId: result.insertId }
             })
             .catch(e => console.log('Error in firstDataSet(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
@@ -278,6 +360,7 @@ export class DatabaseProvider {
                   creationDate: Date.now()
                 })
                   .then((result) => {
+                    console.log('result of SaveOrUpdateFearStep', JSON.stringify(result));
                     return {
                       fearId: data.fearId,
                       fearStepId: result.insertId
@@ -291,7 +374,6 @@ export class DatabaseProvider {
         } else {
           return Promise.resolve(data)
         }
-
       })
       .then((data: any) => {
         if (data.fearId) {
