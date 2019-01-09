@@ -7,7 +7,7 @@
 </ion-header>
 
 <ion-content padding>
-  <session-chart [data]="fearSteps"></session-chart>
+  <session-chart id="session-chart" [data]="fearSteps"></session-chart>
   <button (click)="emptyDB()">Empty the Database</button>
   <ion-list>
     <span ion-item *ngFor="let item of fears">
