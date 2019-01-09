@@ -20,7 +20,6 @@ export class HomePage {
       if (typeof fears[0] !== 'undefined') {
         this.db.getExtendedFearSteps(fears[0].id)
         .then((result) => this.fearSteps = result.fearSteps);
-      
       };
     });
   }
