@@ -10,8 +10,6 @@ import { FearStep } from '../../models/fearStep.model';
 })
 export class HomePage {
 
-  firstId: number = null;
-
   fears: Fear[];
   fearSteps: FearStep[];
 
@@ -19,8 +17,11 @@ export class HomePage {
     console.log('Inside Component Constructor')
     this.db.allFears.subscribe((fears) => {
       this.fears = fears;
-      this.firstId = typeof fears[0] === 'undefined' ? null : fears[0].id;
-      console.log("firsId ", this.firstId);
+      if (typeof fears[0] !== 'undefined') {
+        this.db.getExtendedFearSteps(fears[0].id)
+        .then((result) => this.fearSteps = result.fearSteps);
+      
+      };
     });
   }
 

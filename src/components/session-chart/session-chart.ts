@@ -17,64 +17,55 @@ import { DatabaseProvider } from '../../providers/database/database';
 })
 export class SessionChartComponent {
 
-  @Input() fearId: number;
-  chart: [] = [];
-  fear: Fear;
+  @Input() data: any[];
+  chart: any[] = [];
   fearSteps: FearStep[];
 
   constructor(private database: DatabaseProvider) {
-    if (this.fearId) {
-      database.isReady
-        .then(() => {
-          database.getFear(this.fearId)
-            .then((fear) => this.fear = fear);
-          database.getExtendedFearSteps(this.fearId)
-            .then((result) => this.fearSteps = result.fearSteps);
-        })
-    }
-
   }
 
   ngOnChanges() {
-    if (this.fearId) {
-      this.database.isReady
-        .then(() => {
-          this.database.getFear(this.fearId)
-            .then((fear) => this.fear = fear);
-          this.database.getExtendedFearSteps(this.fearId)
-            .then((result) => this.fearSteps = result.fearSteps);
+    if (this.data) {
+      let datasets = [];
+      this.data.forEach((fearStep) => {
+        let dataArray = [{
+          x: fearStep.initialDegree,
+          y: fearStep.creationDate
+        }];
+        fearStep.sessionLogs.forEach((sessionLog) => {
+          dataArray = [...dataArray, {
+            x: sessionLog.endDegree,
+            y: sessionLog.date
+          }]
         })
-    }
-
-  }
-
-  ngOnInit() {
-    this.chart = new Chart('canvas', {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [
-          {
-            data: [],
-            borderColor: "#3cba9f",
-            fill: false
-          }
-        ]
-      },
-      options: {
-        legend: {
-          display: false
+        datasets = [...datasets, {
+          data: dataArray,
+          borderColor: "#112233",
+          fill: false
+        }];
+      })
+      this.chart = new Chart('canvas', {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: datasets
         },
-        scales: {
-          xAxes: [{
-            display: true
-          }],
-          yAxes: [{
-            display: true
-          }],
+        options: {
+          legend: {
+            display: false
+          },
+          scales: {
+            xAxes: [{
+              display: true
+            }],
+            yAxes: [{
+              display: true
+            }],
+          }
         }
-      }
-    });
+      });
+    }
+    
   }
 
 }

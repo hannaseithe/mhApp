@@ -186,7 +186,7 @@ export class DatabaseProvider {
     return this.delete(id, TableName.fear)
       .then(() => {
         this.getAllFears();
-       this.getAllFearSteps();
+        this.getAllFearSteps();
         /*this.getAllSessions();
         this.getAllSessionLogs(); */
       })
@@ -264,12 +264,12 @@ export class DatabaseProvider {
             }
           } else {
             resultArray[fearIndex].fearSteps = [...resultArray[fearIndex].fearSteps, {
-                id: item.id,
-                name: item.name,
-                description: item.description,
-                initialDegree: item.initialDegree,
-                creationDate: item.creationDate
-              }]
+              id: item.id,
+              name: item.name,
+              description: item.description,
+              initialDegree: item.initialDegree,
+              creationDate: item.creationDate
+            }]
           }
         }
         console.log('resultArray of getAllFearSteps', JSON.stringify(resultArray))
@@ -286,15 +286,15 @@ export class DatabaseProvider {
     WHERE id = ?
     `;
     return this.db.executeSql(statement, [fearId])
-    .then((result) => {
-      let resultArray = [];
-      for (let i = 0; i < result.rows.length; i++) {
-        resultArray = [...resultArray, result.rows.item(i)];
-      }
-      console.log('resultArray from getFear() ', resultArray);
-      return Promise.resolve(resultArray)
-    })
-    .catch(e => console.log('Error in getFear(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
+      .then((result) => {
+        let resultArray = [];
+        for (let i = 0; i < result.rows.length; i++) {
+          resultArray = [...resultArray, result.rows.item(i)];
+        }
+        console.log('resultArray from getFear() ', JSON.stringify(resultArray));
+        return Promise.resolve(resultArray)
+      })
+      .catch(e => console.log('Error in getFear(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
   }
 
   getExtendedFearSteps(fearId: number): Promise<any> {
@@ -308,27 +308,48 @@ export class DatabaseProvider {
     sessionLog.id as slId,
     sessionLog.initialDegree as slInitialDegree,
     sessionLog.endDegree as slEndDegree,
-    session.id as sId,
-    session.number as sNumber,
-    session.endDate  as sEndDate    
+    session.endDate as sEndDate    
     FROM fear
     LEFT JOIN fearStep ON fear.id = fearStep.fearId
     LEFT JOIN sessionLog ON fearStep.id = sessionLog.fearStepId
     LEFT JOIN session ON sessionLog.sessionId = session.id
     WHERE fear.id = ?
-    `;
-
+    `
     return this.db.executeSql(statement, [fearId])
-    .then((result) => {
-      let resultArray = [];
-      for (let i = 0; i < result.rows.length; i++) {
-        resultArray = [...resultArray, result.rows.item(i)];
-      }
-      console.log(fearId);
-      console.log('resultArray from getExtendedFearSteps() ', resultArray);
-      return Promise.resolve(resultArray)
-    })
-    .catch(e => console.log('Error in getFear(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
+      .then((result) => {
+        let resultArray = [];
+        let fearStepIndex = -1;
+        for (let i = 0; i < result.rows.length; i++) {
+          let item = result.rows.item(i);
+          if (fearStepIndex < 0 || resultArray[fearStepIndex].fearId !== item.fearId) {
+            fearStepIndex++;
+            resultArray[fearStepIndex] = {
+              id: item.fsId,
+              name: item.fsName,
+              description: item.fsDescription,
+              initialDegree: item.fsInitialDegree,
+              creationDate: item.fsCreationDate,
+              sessionLogs: [{
+                id: item.slId,
+                initialDegree: item.slInitialDegree,
+                endDegree: item.slEndDegree,
+                date: item.sEndDate
+              }]
+            }
+          } else {
+            resultArray[fearStepIndex].sessionLogs = [...resultArray[fearStepIndex].sessionLogs, {
+              id: item.slId,
+              initialDegree: item.slInitialDegree,
+              endDegree: item.slEndDegree,
+              date: item.sEndDate
+            }]
+          }
+        }
+        console.log(fearId);
+        console.log('resultArray from getExtendedFearSteps() ', JSON.stringify(resultArray));
+        return Promise.resolve(resultArray)
+      })
+      .catch(e => console.log('Error in getFear(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
   }
 
   firstDataSet(): Promise<any> {
