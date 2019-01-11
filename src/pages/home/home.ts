@@ -3,6 +3,7 @@ import { NavController } from 'ionic-angular';
 import { DatabaseProvider } from '../../providers/database/database';
 import { Fear } from '../../models/fear.model';
 import { FearStep } from '../../models/fearStep.model';
+import { FearPage } from '../fear/fear';
 
 @Component({
   selector: 'page-home',
@@ -29,6 +30,10 @@ export class HomePage {
   }
 
   ngOnInit() {
+  }
+
+  selectFear(id: number) {
+    this.navCtrl.push(FearPage, {id: id});
   }
 
   emptyDB() {

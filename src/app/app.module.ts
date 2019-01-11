@@ -9,6 +9,8 @@ import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 import { DatabaseProvider } from '../providers/database/database';
 import { ComponentsModule } from '../components/components.module';
+import { FearPageModule } from '../pages/fear/fear.module';
+import { FearStepPageModule } from '../pages/fear-step/fear-step.module';
 
 @NgModule({
   declarations: [
@@ -18,7 +20,9 @@ import { ComponentsModule } from '../components/components.module';
   imports: [
     BrowserModule,
     IonicModule.forRoot(MyApp),
-    ComponentsModule
+    ComponentsModule,
+    FearPageModule,
+    FearStepPageModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [

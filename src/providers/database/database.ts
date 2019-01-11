@@ -141,6 +141,7 @@ export class DatabaseProvider {
       })
   }
   saveOrUpdateFearStep(data: FearStep): Promise<any> {
+    console.log('saveOrUpdateFearStep data', data)
     return this.saveOrUpdate(data, TableName.fearStep)
       .then((result) => {
         this.getAllFearSteps();
@@ -287,12 +288,9 @@ export class DatabaseProvider {
     `;
     return this.db.executeSql(statement, [fearId])
       .then((result) => {
-        let resultArray = [];
-        for (let i = 0; i < result.rows.length; i++) {
-          resultArray = [...resultArray, result.rows.item(i)];
-        }
-        console.log('resultArray from getFear() ', JSON.stringify(resultArray));
-        return Promise.resolve(resultArray)
+        let resultObject = result.rows.item(0);
+        console.log('resultObject from getFear() ', JSON.stringify(resultObject));
+        return Promise.resolve(resultObject)
       })
       .catch(e => console.log('Error in getFear(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
   }
@@ -321,7 +319,8 @@ export class DatabaseProvider {
         let fearStepIndex = -1;
         for (let i = 0; i < result.rows.length; i++) {
           let item = result.rows.item(i);
-          if (fearStepIndex < 0 || resultArray[fearStepIndex].fearId !== item.fearId) {
+          console.log('resultItem from getExtendedFearSteps',item);
+          if (fearStepIndex < 0 || resultArray[fearStepIndex].id !== item.fsId) {
             fearStepIndex++;
             resultArray[fearStepIndex] = {
               id: item.fsId,
