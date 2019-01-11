@@ -322,26 +322,30 @@ export class DatabaseProvider {
           console.log('resultItem from getExtendedFearSteps',item);
           if (fearStepIndex < 0 || resultArray[fearStepIndex].id !== item.fsId) {
             fearStepIndex++;
+            let sessionLog = item.slId ? [{
+              id: item.slId,
+              initialDegree: item.slInitialDegree,
+              endDegree: item.slEndDegree,
+              date: item.sEndDate
+            }] : [] ;
             resultArray[fearStepIndex] = {
               id: item.fsId,
               name: item.fsName,
               description: item.fsDescription,
               initialDegree: item.fsInitialDegree,
               creationDate: item.fsCreationDate,
-              sessionLogs: [{
-                id: item.slId,
-                initialDegree: item.slInitialDegree,
-                endDegree: item.slEndDegree,
-                date: item.sEndDate
-              }]
+              sessionLogs: sessionLog
             }
           } else {
-            resultArray[fearStepIndex].sessionLogs = [...resultArray[fearStepIndex].sessionLogs, {
+            if (item.slId) {
+              resultArray[fearStepIndex].sessionLogs = [...resultArray[fearStepIndex].sessionLogs, {
               id: item.slId,
               initialDegree: item.slInitialDegree,
               endDegree: item.slEndDegree,
               date: item.sEndDate
             }]
+            }
+            
           }
         }
         console.log(fearId);

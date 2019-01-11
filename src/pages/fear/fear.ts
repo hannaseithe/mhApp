@@ -27,7 +27,8 @@ export class FearPage {
     public navCtrl: NavController,
     public navParams: NavParams,
     private db: DatabaseProvider,
-    public modalCtrl: ModalController) {
+    public modalCtrl: ModalController,
+    public ref: ChangeDetectorRef) {
 
     this.fearId = navParams.get('id');
     this.db.getFear(this.fearId)
@@ -35,7 +36,10 @@ export class FearPage {
         this.fear = result
       })
     this.db.getExtendedFearSteps(this.fearId)
-      .then((result) => this.fearSteps = result)
+      .then((result) => {
+        this.fearSteps = result;
+        this.ref.detectChanges();
+      })
   }
 
   ionViewDidLoad() {

@@ -14,14 +14,18 @@
 
 
 <ion-content padding>
+  
+  <session-chart id="session-chart" [data]="fearSteps"></session-chart>
   <ion-fab bottom right>
-    <button ion-fab (click)="addFearStep()"><ion-icon name="add"></ion-icon></button>
+    <button ion-fab (click)="addFearStep()">
+      <ion-icon name="add"></ion-icon>
+    </button>
   </ion-fab>
   <ion-list>
     <span ion-item *ngFor="let item of fearSteps">
       {{item.name}}
-    </span>  
+    </span>
   </ion-list>
-  <session-chart id="session-chart" [data]="fearSteps"></session-chart>
+
 
 </ion-content>

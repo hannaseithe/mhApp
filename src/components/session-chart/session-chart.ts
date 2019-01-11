@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { Chart } from 'chart.js';
 import { FearStep } from '../../models/fearStep.model';
 import { Platform } from 'ionic-angular';
@@ -16,6 +16,7 @@ import { Platform } from 'ionic-angular';
 export class SessionChartComponent {
 
   @Input() data: any[];
+  @ViewChild('myCanvas') canvas; 
   chart: any[] = [];
   fearSteps: FearStep[];
 
@@ -34,7 +35,6 @@ export class SessionChartComponent {
   }
 
   ngOnChanges() {
-    let x = new Date();
     this.platform.ready()
       .then(() => {
         console.log('device ready');
@@ -45,6 +45,15 @@ export class SessionChartComponent {
           console.error(error)
         } 
       })
+  }
+
+  private getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
   }
 
   renderChart() {
@@ -67,11 +76,11 @@ export class SessionChartComponent {
           })
           datasets = [...datasets, {
             data: dataArray,
-            borderColor: "#112233",
+            borderColor: this.getRandomColor(),
             fill: false
           }];
         })
-        this.chart = new Chart('myCanvas', {
+        this.chart = new Chart(this.canvas.nativeElement, {
           type: 'line',
           data: {
             labels: [],
@@ -79,8 +88,19 @@ export class SessionChartComponent {
           },
           options: {
             scales: {
-              xAxes: [{
-                type: 'time'
+              xAxes:  [{
+                type: 'time',
+                display: true,
+                scaleLabel: {
+                  display: true,
+                  labelString: 'Date'
+                },
+                ticks: {
+                  major: {
+                    fontStyle: 'bold',
+                    fontColor: '#FF0000'
+                  }
+                }
               }],
               yAxes: [{
                 ticks: {
