@@ -11,7 +11,7 @@
   <button (click)="emptyDB()">Empty the Database</button>
   <ion-list>
     <span ion-item *ngFor="let item of fears">
-      <button (click)="selectFear(item.id)">{{ item.name }}</button>
+      <button ion-button (click)="selectFear(item.id)">{{ item.name }}</button>
     </span>  
   </ion-list>
   

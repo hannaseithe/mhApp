@@ -212,24 +212,23 @@ export class DatabaseProvider {
       .catch(e => console.log('Error in delete(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
   }
 
-  getAllFears(): Promise<void | any[]> {
+  getAllFears(): Promise<any> {
 
     const statement = `
       SELECT 
       *
       FROM fear
-      `
-    console.log('getallFears Statement', statement);
+      `;
     return this.db.executeSql(statement, [])
       .then((result) => {
-        let resultArray = [];
+        let resultArray: any[] = [];
         for (let i = 0; i < result.rows.length; i++) {
           resultArray = [...resultArray, result.rows.item(i)];
         }
         return Promise.resolve(resultArray)
       })
-      .then((resultArray) => this.allFears.next(resultArray))
-      .catch(e => console.log('Error in getAllFears(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
+      .then((result)=> this.allFears.next(result))
+      .catch(e => console.error('Error in getAllFears(): ', JSON.stringify(e, Object.getOwnPropertyNames(e))));
 
   }
 

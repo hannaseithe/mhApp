@@ -11,6 +11,9 @@ import { DatabaseProvider } from '../providers/database/database';
 import { ComponentsModule } from '../components/components.module';
 import { FearPageModule } from '../pages/fear/fear.module';
 import { FearStepPageModule } from '../pages/fear-step/fear-step.module';
+import { SessionPageModule } from '../pages/session/session.module';
+import { SessionLogPage } from '../pages/session-log/session-log';
+import { SessionLogPageModule } from '../pages/session-log/session-log.module';
 
 @NgModule({
   declarations: [
@@ -22,7 +25,9 @@ import { FearStepPageModule } from '../pages/fear-step/fear-step.module';
     IonicModule.forRoot(MyApp),
     ComponentsModule,
     FearPageModule,
-    FearStepPageModule
+    FearStepPageModule,
+    SessionPageModule,
+    SessionLogPageModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [

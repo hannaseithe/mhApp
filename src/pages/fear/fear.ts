@@ -4,6 +4,7 @@ import { DatabaseProvider } from '../../providers/database/database';
 import { Fear } from '../../models/fear.model';
 import { FearStep } from '../../models/fearStep.model';
 import { FearStepPage } from '../fear-step/fear-step';
+import { SessionPage } from '../session/session';
 
 /**
  * Generated class for the FearPage page.
@@ -60,6 +61,21 @@ export class FearPage {
       this.db.saveOrUpdateFearStep(newFearStep)
         .then(() => this.db.getExtendedFearSteps(this.fearId))
         .then((result) => this.fearSteps = result)
+    });
+    modal.present();
+  }
+
+  train() {
+    const modal = this.modalCtrl.create(SessionPage, {
+      fear: this.fear,
+      fearSteps: this.fearSteps  
+    });
+    modal.onDidDismiss(() => {
+      this.db.getExtendedFearSteps(this.fearId)
+      .then((result) => {
+        this.fearSteps = result;
+        this.ref.detectChanges();
+      })
     });
     modal.present();
   }
