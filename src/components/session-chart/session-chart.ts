@@ -63,6 +63,7 @@ export class SessionChartComponent {
     try {
       if (this.data) {
         let datasets = [];
+        let labels = [];
         this.data.forEach((fearStep) => {
           let dataArray = [{
             x: new Date(fearStep.creationDate),
@@ -75,6 +76,7 @@ export class SessionChartComponent {
             }]
           })
           datasets = [...datasets, {
+            label: fearStep.name,
             data: dataArray,
             borderColor: this.getRandomColor(),
             fill: false
@@ -83,7 +85,6 @@ export class SessionChartComponent {
         this.chart = new Chart(this.canvas.nativeElement, {
           type: 'line',
           data: {
-            labels: [],
             datasets: datasets
           },
           options: {

@@ -25,27 +25,36 @@ export class SessionPage {
   fears: Fear[] = [];
   fearSteps: FearStep[] = [];
   session: Session;
-  
+
 
   constructor(
-    public navCtrl: NavController, 
-    public navParams: NavParams, 
+    public navCtrl: NavController,
+    public navParams: NavParams,
     public db: DatabaseProvider,
     public modalCtrl: ModalController,
     public viewCtrl: ViewController) {
+
     this.fear = navParams.get('fear');
     this.fearSteps = navParams.get('fearSteps');
+    this.session = {
+      number: 0,
+      startDate: Date.now(),
+      endDate: Date.now(),
+      note: null,
+      fearId: this.fear.id
+    }
+
     if (!this.fear) {
       this.db.getAllFears()
-      .then((result) => {
-        this.fears = result;
-      })
+        .then((result) => {
+          this.fears = result;
+        })
     }
     if (this.fear && !this.fearSteps) {
       this.db.getExtendedFearSteps(this.fear.id)
-      .then((result) => {
-        this.fearSteps = result;
-      })
+        .then((result) => {
+          this.fearSteps = result;
+        })
     }
   }
 
@@ -58,32 +67,25 @@ export class SessionPage {
   }
 
   train(fearStep: FearStep) {
-    console.log('train! ',JSON.stringify(fearStep))
+    console.log('train! ', JSON.stringify(fearStep))
     const modal = this.modalCtrl.create(SessionLogPage, {
       fearStep: fearStep
     });
     modal.onDidDismiss(data => {
       console.log('Page Fear on Modal Dismiss');
-      if (!this.session) {
-        const newSession: Session = {
-          number: 0,
-          startDate: Date.now(),
-          endDate: null,
-          note: null,
-          fearId: this.fear.id
-        }
-        this.db.saveOrUpdateSession(newSession)
-        .then((result) => {
-          this.session = result;
-          const newSessionLog: SessionLog = {
-            sessionId: result.id,
-            fearStepId: fearStep.id,
-            initialDegree: data.initialDegree,
-            endDegree: data.endDegree,
-            date: Date.now()
-          }
-          this.db.saveOrUpdateSessionLog(newSessionLog)
-        })
+      if (!this.session.id) {
+        this.db.saveOrUpdateSession(this.session)
+          .then((result) => {
+            this.session.id = result.insertId;
+            const newSessionLog: SessionLog = {
+              sessionId: this.session.id,
+              fearStepId: fearStep.id,
+              initialDegree: data.initialDegree,
+              endDegree: data.endDegree,
+              date: Date.now()
+            }
+            this.db.saveOrUpdateSessionLog(newSessionLog)
+          })
       } else {
         const newSessionLog: SessionLog = {
           sessionId: this.session.id,

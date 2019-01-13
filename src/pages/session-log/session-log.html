@@ -23,12 +23,18 @@
     
           <ion-item>
             <ion-label floating>initialDegree</ion-label>
-            <ion-input type="text" formControlName="initialDegree"></ion-input>
+            <ion-range min="1" max="10" formControlName="initialDegree" pin="true" color="secondary">
+                <ion-label range-left>1</ion-label>
+                <ion-label range-right>10</ion-label>
+              </ion-range>
           </ion-item>
     
           <ion-item>
             <ion-label floating>endDegree</ion-label>
-            <ion-textarea formControlName="endDegree"></ion-textarea>
+            <ion-range min="1" max="10" formControlName="endDegree" pin="true" color="secondary">
+                <ion-label range-left>1</ion-label>
+                <ion-label range-right>10</ion-label>
+              </ion-range>
           </ion-item>
     
         </ion-list>

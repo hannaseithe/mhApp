@@ -1,3 +1,5 @@
+import { SessionLog } from "./sessionLog.model";
+
 export interface FearStep {
     id?: number; 
     fearId: number;
@@ -5,4 +7,5 @@ export interface FearStep {
     description?: string;
     initialDegree: number;
     creationDate: number;
+    sessionLogs?: SessionLog[];
 }
