@@ -25,6 +25,7 @@ export class SessionPage {
   fears: Fear[] = [];
   fearSteps: FearStep[] = [];
   session: Session;
+  trainedFS: Number[] = [];
 
 
   constructor(
@@ -72,6 +73,7 @@ export class SessionPage {
       fearStep: fearStep
     });
     modal.onDidDismiss(data => {
+      this.trainedFS = [...this.trainedFS, fearStep.id];
       console.log('Page Fear on Modal Dismiss');
       if (!this.session.id) {
         this.db.saveOrUpdateSession(this.session)

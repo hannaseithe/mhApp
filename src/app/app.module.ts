@@ -12,7 +12,6 @@ import { ComponentsModule } from '../components/components.module';
 import { FearPageModule } from '../pages/fear/fear.module';
 import { FearStepPageModule } from '../pages/fear-step/fear-step.module';
 import { SessionPageModule } from '../pages/session/session.module';
-import { SessionLogPage } from '../pages/session-log/session-log';
 import { SessionLogPageModule } from '../pages/session-log/session-log.module';
 
 @NgModule({
@@ -21,9 +20,9 @@ import { SessionLogPageModule } from '../pages/session-log/session-log.module';
     HomePage
   ],
   imports: [
+    ComponentsModule,
     BrowserModule,
     IonicModule.forRoot(MyApp),
-    ComponentsModule,
     FearPageModule,
     FearStepPageModule,
     SessionPageModule,

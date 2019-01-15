@@ -1,9 +1,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SessionChartComponent } from './session-chart/session-chart';
+import { AnimationComponent } from './animation/animation';
 @NgModule({
-	declarations: [SessionChartComponent],
+	declarations: [AnimationComponent, SessionChartComponent
+    ],
 	imports: [CommonModule],
-	exports: [SessionChartComponent]
+	exports: [AnimationComponent, SessionChartComponent
+    ]
 })
 export class ComponentsModule {}
