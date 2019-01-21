@@ -13,6 +13,7 @@ import { FearPageModule } from '../pages/fear/fear.module';
 import { FearStepPageModule } from '../pages/fear-step/fear-step.module';
 import { SessionPageModule } from '../pages/session/session.module';
 import { SessionLogPageModule } from '../pages/session-log/session-log.module';
+import { AnimationPageModule } from '../pages/animation/animation.module';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { SessionLogPageModule } from '../pages/session-log/session-log.module';
     FearPageModule,
     FearStepPageModule,
     SessionPageModule,
-    SessionLogPageModule
+    SessionLogPageModule,
+    AnimationPageModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [

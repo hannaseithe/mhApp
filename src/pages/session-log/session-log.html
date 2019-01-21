@@ -20,16 +20,24 @@
           <ion-list-header>
             Training Session
           </ion-list-header>
+
+          <ion-item *ngIf="step===1">
+            <button ion-button (click)="enterInitialDegree()">Initial Degree</button>
+          </ion-item>
     
-          <ion-item>
+          <ion-item *ngIf="step===2">
             <ion-label floating>initialDegree</ion-label>
             <ion-range min="1" max="10" formControlName="initialDegree" pin="true" color="secondary">
                 <ion-label range-left>1</ion-label>
                 <ion-label range-right>10</ion-label>
               </ion-range>
           </ion-item>
+
+          <ion-item *ngIf="step===2 && sessionLogForm.get('initialDegree').dirty">
+            <button ion-button (click)="enterEndDegree()">Initial Degree</button>
+          </ion-item>
     
-          <ion-item>
+          <ion-item *ngIf="step===3">
             <ion-label floating>endDegree</ion-label>
             <ion-range min="1" max="10" formControlName="endDegree" pin="true" color="secondary">
                 <ion-label range-left>1</ion-label>
