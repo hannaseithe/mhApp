@@ -32,7 +32,12 @@ export class AnimationComponent {
   private _GEOMETRY;
   public _MATERIAL;
   public _CUBE;
-  public spheres = []
+  public spheres = [];
+  private degreeX = 0;
+  private mouseY = 0;
+  private mouseStartX: number;
+  private windowHalfX = window.innerWidth / 2;
+	private windowHalfY = window.innerHeight / 2;
 
   /* var container;
 			var camera, scene, renderer;
@@ -56,10 +61,13 @@ export class AnimationComponent {
     this._SCENE = new THREE.Scene();
     this._SCENE.background = new THREE.CubeTextureLoader()
     .setPath( '../../assets/imgs/cubeMap/' )
-    .load( [ 'left.jpg', 'right.jpg', 'oben.jpg', 'unten.jpg', 'hinten.jpg', 'vorne.jpg' ] );
+    .load( [ 
+      'right.jpg', 
+      'left.jpg', 'oben.jpg', 'unten.jpg', 'vorne.jpg', 'hinten.jpg' ] );
     this._CAMERA = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     this._CAMERA.position.z = 320;
     this._CAMERA.rotation.y = -30 * Math.PI / 180;
+    this._CAMERA.rotation.x = 0;
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this._ELEMENT.appendChild(this.renderer.domElement);
@@ -90,6 +98,11 @@ export class AnimationComponent {
       sphere.position.y = 500 * Math.sin(timer + i * 1.1);
     }
 
+    this._CAMERA.rotation.x += (this._CAMERA.rotation.x + this.degreeX ) * .05;
+				/* this._CAMERA.position.y += ( - this.mouseY - this._CAMERA.position.y ) * .05; */
+				this._CAMERA.lookAt(this._SCENE.position );
+				
+
     this.renderer.render(this._SCENE, this._CAMERA);
   };
 
@@ -112,6 +125,16 @@ export class AnimationComponent {
        var warning = Detector.getWebGLErrorMessage();
        console.log(warning);
     }*/
+  }
+
+  moveStarted(event) {
+    this.mouseStartX =  event.changedTouches[0].clientX;
+  }
+
+  moved(event) {
+        this.degreeX = ( -(this.mouseStartX - event.changedTouches[0].clientX) ) ;
+        this.mouseStartX = event.changedTouches[0].clientX;
+				/* this.mouseY = ( event.changedTouches[0].clientY - this.windowHalfY ) * 5; */
   }
 
 
